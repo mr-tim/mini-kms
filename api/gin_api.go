@@ -18,6 +18,7 @@ func (api GinApi) Run() {
 	v1 := r.Group("/kms/v1")
 	{
 		v1.POST("/keys", api.createKey)
+		v1.GET("/keys/names", api.getKeyNames)
 	}
 
 	r.Run()
@@ -65,4 +66,13 @@ func (api GinApi) createKey(c *gin.Context) {
 		"name": newKey.VersionName,
 		"material": base64.StdEncoding.EncodeToString(newKey.Material),
 	})
+}
+
+func (api GinApi) getKeyNames(c *gin.Context) {
+	err, names := api.k.GetKeyNames()
+	if err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
+	c.JSON(200, names)
 }

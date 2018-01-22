@@ -60,8 +60,12 @@ func (InMemoryKms) GetKeyVersions(keyName string) (error, []string) {
 	return notImplemented(), nil
 }
 
-func (InMemoryKms) GetKeyNames() (error, []string) {
-	return notImplemented(), nil
+func (k InMemoryKms) GetKeyNames() (error, []string) {
+	keyNames := make([]string, 0, len(k.metadata))
+	for k := range k.metadata {
+		keyNames = append(keyNames, k)
+	}
+	return nil, keyNames
 }
 
 func (InMemoryKms) GetKeysMetadata(names []string) (error, []KeyMeta) {
