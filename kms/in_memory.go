@@ -1,17 +1,31 @@
 package kms
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type InMemoryKms struct {
-
+	metadata map[string]KeyMeta
+	material map[string][]byte
 }
 
 func notImplemented() error {
 	return errors.New("kms: Not implemented")
 }
 
-func (InMemoryKms) CreateKey(desc KeyDesc) (error, *KeyVersion) {
-	return notImplemented(), nil
+func (k InMemoryKms) CreateKey(desc KeyDesc) (error, *KeyVersion) {
+	versionName := fmt.Sprintf("%s/%d", desc.Metadata.Name, 0)
+	material := desc.Material
+
+	k.metadata[desc.Metadata.Name] = desc.Metadata
+	k.material[versionName] = material
+
+	newKey := KeyVersion{
+		versionName,
+		material,
+	}
+	return nil, &newKey
 }
 
 func (InMemoryKms) RolloverKey(name string, material string) (error, *KeyVersion) {

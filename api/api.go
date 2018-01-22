@@ -1,9 +1,11 @@
 package api
 
+import "../kms"
+
 type Api interface {
 	Run()
 }
 
-func New() Api {
-	return PingApi{}
+func New(k kms.Kms) Api {
+	return GinApi{k}
 }

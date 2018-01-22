@@ -1,8 +1,12 @@
 package main
 
-import "./api"
+import (
+	"./api"
+	"./kms"
+)
 
 func main() {
-	a := api.New()
+	k := kms.New()
+	a := api.New(k)
 	a.Run()
 }
