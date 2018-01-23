@@ -75,12 +75,107 @@ func (api GinApi) getKeyMetadata(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{
+	c.JSON(200, metadataToJson(metadata))
+}
+func metadataToJson(metadata *kms.KeyMeta) gin.H {
+	return gin.H{
 		"name":        metadata.Name,
 		"cipher":      metadata.Cipher,
 		"length":      metadata.Length,
 		"description": metadata.Description,
 		"created":     metadata.Created,
 		"versions":    metadata.Versions,
-	})
+	}
+}
+
+func (api GinApi) getKeysMetadata(c *gin.Context) {
+	keyNames := c.QueryArray("key")
+	error, metadata := api.k.GetKeysMetadata(keyNames)
+	if error != nil {
+		c.AbortWithError(500, error)
+		return
+	}
+
+	metaSlice := make([]gin.H, len(metadata))
+	for _, m := range metadata {
+		metaSlice = append(metaSlice, metadataToJson(&m))
+	}
+
+	c.JSON(200, metaSlice)
+}
+
+type NewKeyMaterial struct {
+	MaterialBase64 string `json:"material"`
+}
+
+func (api GinApi) rolloverKey(c *gin.Context) {
+	keyName := c.Param("keyName")
+	var m NewKeyMaterial
+	c.BindJSON(&m)
+
+	material, err := base64.StdEncoding.DecodeString(m.MaterialBase64)
+	if err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
+
+	err, version := api.k.RolloverKey(keyName, material)
+	if err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
+
+	c.JSON(200, serializeVersion(version))
+}
+
+func serializeVersion(version *kms.KeyVersion) gin.H {
+	return gin.H{
+		"name":     version.VersionName,
+		"material": base64.StdEncoding.EncodeToString(version.Material),
+	}
+}
+
+func (api GinApi) deleteKey(c *gin.Context) {
+	keyName := c.Param("keyName")
+	err := api.k.DeleteKey(keyName)
+	if err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
+	c.Status(200)
+}
+
+func (api GinApi) getCurrentVersion(c *gin.Context) {
+	keyName := c.Param("keyName")
+	err, version := api.k.CurrentVersion(keyName)
+	if err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
+	c.JSON(200, serializeVersion(version))
+}
+
+func (api GinApi) getAllVersions(c *gin.Context) {
+	keyName := c.Param("keyName")
+	err, versions := api.k.GetKeyVersions(keyName)
+	if err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
+
+	result := make([]gin.H, 0)
+	for _, v := range versions {
+		result = append(result, serializeVersion(&v))
+	}
+	c.JSON(200, result)
+}
+
+func (api GinApi) getKeyVersion(c *gin.Context) {
+	keyVersionName := c.Param("keyVersionName")
+	err, version := api.k.GetKeyVersion(keyVersionName)
+	if err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
+	c.JSON(200, serializeVersion(version))
 }

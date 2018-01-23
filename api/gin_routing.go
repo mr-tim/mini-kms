@@ -8,12 +8,19 @@ func (api GinApi) Run() {
 	{
 		keys.POST("", api.createKey)
 		keys.GET("/names", api.getKeyNames)
+		keys.GET("/metadata", api.getKeysMetadata)
 	}
 
-	key := r.Group("kms/v1/key/:keyName")
+	key := r.Group("/kms/v1/key/:keyName")
 	{
+		key.POST("", api.rolloverKey)
+		key.DELETE("", api.deleteKey)
 		key.GET("/_metadata", api.getKeyMetadata)
+		key.GET("/_currentVersion", api.getCurrentVersion)
+		key.GET("/_versions", api.getAllVersions)
 	}
+
+	r.GET("/kms/v1/keyversion/:keyVersionName", api.getKeyVersion)
 
 	r.Run()
 }

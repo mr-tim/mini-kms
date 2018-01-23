@@ -5,16 +5,16 @@ A toy implementation of the [Hadoop KMS API](https://hadoop.apache.org/docs/stab
 
 APIs currently implemented:
 - [x] Key creation
-- [ ] Rollover Key
-- [ ] Delete Key
+- [x] Rollover Key
+- [x] Delete Key
 - [x] Get Key Metadata
-- [ ] Get Current Key 
+- [x] Get Current Key 
 - [ ] Generate Encrypted Key
 - [ ] Decrypt Encrypted Key
-- [ ] Get Key Version
-- [ ] Get Key Versions
+- [x] Get Key Version
+- [x] Get Key Versions
 - [x] Get Key Names
-- [ ] Get Keys Metadata
+- [x] Get Keys Metadata
 
 Things that still need doing
 - [ ] Tests

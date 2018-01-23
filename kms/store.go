@@ -7,6 +7,8 @@ type KeyStore interface {
 	getMetadata(name string) (*KeyMeta, bool)
 	createNewKeyVersion(name string, material []byte) (error, *KeyVersion)
 	getKeyNames() (error, []string)
+	deleteKey(keyName string) error
+	getKeyVersions(name string) (error, []KeyVersion)
 }
 
 type InMemoryKeyStore struct {
@@ -61,4 +63,14 @@ func (s InMemoryKeyStore) getKeyNames() (error, []string) {
 		keyNames = append(keyNames, k)
 	}
 	return nil, keyNames
+}
+
+func (s InMemoryKeyStore) deleteKey(keyName string) error {
+	delete(s.keyVersionMaterial, keyName)
+	delete(s.keyMetadata, keyName)
+	return nil
+}
+
+func (s InMemoryKeyStore) getKeyVersions(keyName string) (error, []KeyVersion) {
+	return nil, s.keyVersionMaterial[keyName]
 }
