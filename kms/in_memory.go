@@ -7,31 +7,30 @@ import (
 	"io"
 )
 
-type InMemoryKms struct {
-	metadata map[string]KeyMeta
-	material map[string][]byte
-}
-
 func notImplemented() error {
 	return errors.New("kms: Not implemented")
 }
 
+func keyDoesNotExist(name string) error {
+	return errors.New(fmt.Sprintf("kms: Key '%s' does not exist", name))
+}
+
+func keyAlreadyExists(name string) error {
+	return errors.New(fmt.Sprintf("kms: Key '%s' already exists", name))
+}
+
+type InMemoryKms struct {
+	store KeyStore
+}
+
 func (k InMemoryKms) CreateKey(desc KeyDesc) (error, *KeyVersion) {
-	versionName := fmt.Sprintf("%s/%d", desc.Metadata.Name, 0)
 	material := desc.Material
 
 	if len(material) == 0 {
 		material = k.CreateMaterial(desc.Metadata.Cipher, desc.Metadata.Length)
 	}
 
-	k.metadata[desc.Metadata.Name] = desc.Metadata
-	k.material[versionName] = material
-
-	newKey := KeyVersion{
-		versionName,
-		material,
-	}
-	return nil, &newKey
+	return k.store.createKey(desc, material)
 }
 
 func (InMemoryKms) RolloverKey(name string, material string) (error, *KeyVersion) {
@@ -43,11 +42,10 @@ func (InMemoryKms) DeleteKey(name string) error {
 }
 
 func (k InMemoryKms) GetKeyMetadata(name string) (error, *KeyMeta) {
-	meta, found := k.metadata[name]
-	if found {
-		return nil, &meta
+	if meta, found := k.store.getMetadata(name); !found {
+		return keyDoesNotExist(name), nil
 	} else {
-		return errors.New("kms: key does not exist"), nil
+		return nil, meta
 	}
 }
 
@@ -72,19 +70,15 @@ func (InMemoryKms) GetKeyVersions(keyName string) (error, []string) {
 }
 
 func (k InMemoryKms) GetKeyNames() (error, []string) {
-	keyNames := make([]string, 0, len(k.metadata))
-	for k := range k.metadata {
-		keyNames = append(keyNames, k)
-	}
-	return nil, keyNames
+	return k.store.getKeyNames()
 }
 
 func (k InMemoryKms) GetKeysMetadata(names []string) (error, []KeyMeta) {
 	result := make([]KeyMeta, 0)
 	for _, name := range names {
-		meta, found := k.metadata[name]
+		meta, found := k.store.getMetadata(name)
 		if found {
-			result = append(result, meta)
+			result = append(result, *meta)
 		}
 	}
 	return nil, result

@@ -43,7 +43,9 @@ type Kms interface {
 
 func New() Kms {
 	return InMemoryKms{
-		metadata: map[string]KeyMeta{},
-		material: map[string][]byte{},
+		store: InMemoryKeyStore{
+			keyMetadata: map[string]KeyMeta{},
+			keyVersionMaterial: map[string][]KeyVersion{},
+		},
 	}
 }
