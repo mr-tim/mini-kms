@@ -14,22 +14,6 @@ type GinApi struct {
 
 var endpoint = "http://localhost:8080"
 
-func (api GinApi) Run() {
-	r := gin.Default()
-	keys := r.Group("/kms/v1/keys")
-	{
-		keys.POST("", api.createKey)
-		keys.GET("/names", api.getKeyNames)
-	}
-
-	key := r.Group("kms/v1/key/:keyName")
-	{
-		key.GET("/_metadata", api.getKeyMetadata)
-	}
-
-	r.Run()
-}
-
 type CreateKeyRequest struct {
 	Name string `json:"name"`
 	Cipher string `json:"cipher"`
