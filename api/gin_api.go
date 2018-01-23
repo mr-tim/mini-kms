@@ -51,11 +51,14 @@ func (api GinApi) createKey(c *gin.Context) {
 		c.AbortWithError(500, err)
 		return
 	}
-	c.Header("Location", fmt.Sprintf("%s/kms/v1/key/%s", endpoint, createKey.Name))
+	keyLocationHeader(c, createKey.Name)
 	c.JSON(201, gin.H{
 		"name":     newKey.VersionName,
 		"material": base64.StdEncoding.EncodeToString(newKey.Material),
 	})
+}
+func keyLocationHeader(c *gin.Context, name string) {
+	c.Header("Location", fmt.Sprintf("%s/kms/v1/key/%s", endpoint, name))
 }
 
 func (api GinApi) getKeyNames(c *gin.Context) {
@@ -111,7 +114,9 @@ type NewKeyMaterial struct {
 func (api GinApi) rolloverKey(c *gin.Context) {
 	keyName := c.Param("keyName")
 	var m NewKeyMaterial
-	c.BindJSON(&m)
+	if c.Request.ContentLength > 0 {
+		c.BindJSON(&m)
+	}
 
 	material, err := base64.StdEncoding.DecodeString(m.MaterialBase64)
 	if err != nil {
@@ -125,7 +130,8 @@ func (api GinApi) rolloverKey(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, serializeVersion(version))
+	keyLocationHeader(c, keyName)
+	c.JSON(201, serializeVersion(version))
 }
 
 func serializeVersion(version *kms.KeyVersion) gin.H {
