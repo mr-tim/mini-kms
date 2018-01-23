@@ -21,7 +21,7 @@ func (s InMemoryKeyStore) createKey(desc KeyDesc, material []byte) (error, *KeyV
 	if found {
 		return keyAlreadyExists(desc.Metadata.Name), nil
 	}
-
+	desc.Metadata.Versions = 0
 	s.keyMetadata[desc.Metadata.Name] = desc.Metadata
 
 	return s.createNewKeyVersion(desc.Metadata.Name, material)
@@ -42,13 +42,12 @@ func (s InMemoryKeyStore) createNewKeyVersion(keyName string, material []byte) (
 		return keyDoesNotExist(keyName), nil
 	}
 
-	newVersionNumber := meta.Versions + 1
 	newKeyVersion := KeyVersion{
-		s.versionName(keyName, newVersionNumber),
+		s.versionName(keyName, meta.Versions),
 		material,
 	}
 	s.keyVersionMaterial[keyName] = append(s.keyVersionMaterial[keyName], newKeyVersion)
-	meta.Versions = newVersionNumber
+	s.incrementVersionCount(keyName)
 
 	return nil, &newKeyVersion
 }
@@ -58,7 +57,7 @@ func (InMemoryKeyStore) versionName(name string, version int) string {
 }
 
 func (s InMemoryKeyStore) getKeyNames() (error, []string) {
-	keyNames := make([]string, len(s.keyMetadata))
+	keyNames := make([]string, 0)
 	for k := range s.keyMetadata {
 		keyNames = append(keyNames, k)
 	}
@@ -73,4 +72,12 @@ func (s InMemoryKeyStore) deleteKey(keyName string) error {
 
 func (s InMemoryKeyStore) getKeyVersions(keyName string) (error, []KeyVersion) {
 	return nil, s.keyVersionMaterial[keyName]
+}
+
+func (s InMemoryKeyStore) incrementVersionCount(keyName string) {
+	meta, found := s.keyMetadata[keyName]
+	if found {
+		meta.Versions += 1
+		s.keyMetadata[keyName] = meta
+	}
 }
