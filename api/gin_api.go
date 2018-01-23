@@ -2,9 +2,9 @@ package api
 
 import "../kms"
 import (
-	"github.com/gin-gonic/gin"
-	"fmt"
 	"encoding/base64"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"time"
 )
 
@@ -15,11 +15,11 @@ type GinApi struct {
 var endpoint = "http://localhost:8080"
 
 type CreateKeyRequest struct {
-	Name string `json:"name"`
-	Cipher string `json:"cipher"`
-	Length int `json:"length"`
+	Name           string `json:"name"`
+	Cipher         string `json:"cipher"`
+	Length         int    `json:"length"`
 	MaterialBase64 string `json:"material"`
-	Description string `json:"description"`
+	Description    string `json:"description"`
 }
 
 func (api GinApi) createKey(c *gin.Context) {
@@ -37,12 +37,12 @@ func (api GinApi) createKey(c *gin.Context) {
 	}
 	keyDesc := kms.KeyDesc{
 		Metadata: kms.KeyMeta{
-			Name: createKey.Name,
-			Cipher: createKey.Cipher,
-			Length: createKey.Length,
+			Name:        createKey.Name,
+			Cipher:      createKey.Cipher,
+			Length:      createKey.Length,
 			Description: createKey.Description,
-			Created: time.Now().UnixNano() / int64(time.Millisecond),
-			Versions: 1,
+			Created:     time.Now().UnixNano() / int64(time.Millisecond),
+			Versions:    1,
 		},
 		Material: material,
 	}
@@ -53,7 +53,7 @@ func (api GinApi) createKey(c *gin.Context) {
 	}
 	c.Header("Location", fmt.Sprintf("%s/kms/v1/key/%s", endpoint, createKey.Name))
 	c.JSON(201, gin.H{
-		"name": newKey.VersionName,
+		"name":     newKey.VersionName,
 		"material": base64.StdEncoding.EncodeToString(newKey.Material),
 	})
 }
@@ -76,11 +76,11 @@ func (api GinApi) getKeyMetadata(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{
-		"name": metadata.Name,
-		"cipher": metadata.Cipher,
-		"length": metadata.Length,
+		"name":        metadata.Name,
+		"cipher":      metadata.Cipher,
+		"length":      metadata.Length,
 		"description": metadata.Description,
-		"created": metadata.Created,
-		"versions": metadata.Versions,
-		})
+		"created":     metadata.Created,
+		"versions":    metadata.Versions,
+	})
 }

@@ -1,12 +1,12 @@
 package kms
 
 type KeyMeta struct {
-	Name string
-	Cipher string
-	Length int
+	Name        string
+	Cipher      string
+	Length      int
 	Description string
-	Created int64
-	Versions int
+	Created     int64
+	Versions    int
 }
 
 type KeyDesc struct {
@@ -16,14 +16,14 @@ type KeyDesc struct {
 
 type KeyVersion struct {
 	VersionName string
-	Material []byte
+	Material    []byte
 }
 
 type EncryptedKeyVersion struct {
-	KeyName string
+	KeyName     string
 	VersionName string
-	IV []byte
-	Material []byte
+	IV          []byte
+	Material    []byte
 }
 
 type Kms interface {
@@ -42,7 +42,7 @@ type Kms interface {
 
 func New() Kms {
 	return InMemoryKms{
-		metadata: map[string]KeyMeta {},
-		material: map[string][]byte {},
+		metadata: map[string]KeyMeta{},
+		material: map[string][]byte{},
 	}
 }
