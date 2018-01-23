@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"fmt"
 	"encoding/base64"
+	"time"
 )
 
 type GinApi struct {
@@ -36,7 +37,7 @@ func (api GinApi) createKey(c *gin.Context) {
 	var createKey CreateKeyRequest
 	err := c.BindJSON(&createKey)
 	if err != nil {
-		c.Abort()
+		c.AbortWithError(500, err)
 		return
 	}
 	fmt.Printf("Received create key request: %#v\n", createKey)
@@ -46,13 +47,13 @@ func (api GinApi) createKey(c *gin.Context) {
 		return
 	}
 	keyDesc := kms.KeyDesc{
-		Metadata:kms.KeyMeta{
-			createKey.Name,
-			createKey.Cipher,
-			createKey.Length,
-			createKey.Description,
-			-1,
-			-1,
+		Metadata: kms.KeyMeta{
+			Name: createKey.Name,
+			Cipher: createKey.Cipher,
+			Length: createKey.Length,
+			Description: createKey.Description,
+			Created: time.Now().UnixNano() / int64(time.Millisecond),
+			Versions: 1,
 		},
 		Material: material,
 	}
