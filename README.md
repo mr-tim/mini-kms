@@ -4,16 +4,16 @@ Mini-Kms
 A toy implementation of the [Hadoop KMS API](https://hadoop.apache.org/docs/stable/hadoop-kms/index.html#KMS_HTTP_REST_API), written in Go.
 
 APIs currently implemented:
-- [ ] Key creation (need to implement material generation)
+- [x] Key creation
 - [ ] Rollover Key
 - [ ] Delete Key
-- [ ] Get Key Metadata
+- [x] Get Key Metadata
 - [ ] Get Current Key 
 - [ ] Generate Encrypted Key
 - [ ] Decrypt Encrypted Key
 - [ ] Get Key Version
 - [ ] Get Key Versions
-- [ ] Get Key Names
+- [x] Get Key Names
 - [ ] Get Keys Metadata
 
 Things that still need doing
