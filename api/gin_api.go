@@ -97,8 +97,8 @@ func (api GinApi) getKeysMetadata(c *gin.Context) {
 	}
 
 	metaSlice := make([]gin.H, len(metadata))
-	for _, m := range metadata {
-		metaSlice = append(metaSlice, metadataToJson(&m))
+	for i, m := range metadata {
+		metaSlice[i] = metadataToJson(&m)
 	}
 
 	c.JSON(200, metaSlice)
