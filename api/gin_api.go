@@ -27,7 +27,7 @@ func (api GinApi) Run() {
 type CreateKeyRequest struct {
 	Name string `json:"name"`
 	Cipher string `json:"cipher"`
-	Length int `json:"cipher"`
+	Length int `json:"length"`
 	MaterialBase64 string `json:"material"`
 	Description string `json:"description"`
 }
