@@ -38,6 +38,7 @@ type Kms interface {
 	GetKeyVersions(keyName string) (error, []string)
 	GetKeyNames() (error, []string)
 	GetKeysMetadata(names []string) (error, []KeyMeta)
+	CreateMaterial(cipher string, length int) []byte
 }
 
 func New() Kms {

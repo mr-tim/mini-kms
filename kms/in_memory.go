@@ -1,8 +1,10 @@
 package kms
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
+	"io"
 )
 
 type InMemoryKms struct {
@@ -17,6 +19,10 @@ func notImplemented() error {
 func (k InMemoryKms) CreateKey(desc KeyDesc) (error, *KeyVersion) {
 	versionName := fmt.Sprintf("%s/%d", desc.Metadata.Name, 0)
 	material := desc.Material
+
+	if len(material) == 0 {
+		material = k.CreateMaterial(desc.Metadata.Cipher, desc.Metadata.Length)
+	}
 
 	k.metadata[desc.Metadata.Name] = desc.Metadata
 	k.material[versionName] = material
@@ -82,4 +88,12 @@ func (k InMemoryKms) GetKeysMetadata(names []string) (error, []KeyMeta) {
 		}
 	}
 	return nil, result
+}
+
+func (k InMemoryKms) CreateMaterial(cipher string, length int) []byte {
+	key := make([]byte, length/8)
+	if _, err := io.ReadFull(rand.Reader, key); err != nil {
+		panic(err)
+	}
+	return key
 }
