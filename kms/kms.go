@@ -30,7 +30,7 @@ type Kms interface {
 	CreateKey(desc KeyDesc) (error, *KeyVersion)
 	RolloverKey(name string, material string) (error, *KeyVersion)
 	DeleteKey(name string) error
-	GetKeyMetadata(name string) (error, *KeyDesc)
+	GetKeyMetadata(name string) (error, *KeyMeta)
 	CurrentVersion(name string) (error, *KeyVersion)
 	GenerateEncryptedKeys(name string, keysToGenerate int) (error, []EncryptedKeyVersion)
 	DecryptEncryptedKey(versionName string, version EncryptedKeyVersion) error

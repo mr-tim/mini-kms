@@ -16,10 +16,15 @@ var endpoint = "http://localhost:8080"
 
 func (api GinApi) Run() {
 	r := gin.Default()
-	v1 := r.Group("/kms/v1")
+	keys := r.Group("/kms/v1/keys")
 	{
-		v1.POST("/keys", api.createKey)
-		v1.GET("/keys/names", api.getKeyNames)
+		keys.POST("", api.createKey)
+		keys.GET("/names", api.getKeyNames)
+	}
+
+	key := r.Group("kms/v1/key/:keyName")
+	{
+		key.GET("/_metadata", api.getKeyMetadata)
 	}
 
 	r.Run()
@@ -76,4 +81,22 @@ func (api GinApi) getKeyNames(c *gin.Context) {
 		return
 	}
 	c.JSON(200, names)
+}
+
+func (api GinApi) getKeyMetadata(c *gin.Context) {
+	keyName := c.Param("keyName")
+	err, metadata := api.k.GetKeyMetadata(keyName)
+	if err != nil {
+		c.AbortWithError(500, err)
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"name": metadata.Name,
+		"cipher": metadata.Cipher,
+		"length": metadata.Length,
+		"description": metadata.Description,
+		"created": metadata.Created,
+		"versions": metadata.Versions,
+		})
 }

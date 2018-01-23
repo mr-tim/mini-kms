@@ -36,8 +36,13 @@ func (InMemoryKms) DeleteKey(name string) error {
 	return notImplemented()
 }
 
-func (InMemoryKms) GetKeyMetadata(name string) (error, *KeyDesc) {
-	return notImplemented(), nil
+func (k InMemoryKms) GetKeyMetadata(name string) (error, *KeyMeta) {
+	meta, found := k.metadata[name]
+	if found {
+		return nil, &meta
+	} else {
+		return errors.New("kms: key does not exist"), nil
+	}
 }
 
 func (InMemoryKms) CurrentVersion(name string) (error, *KeyVersion) {
@@ -68,6 +73,13 @@ func (k InMemoryKms) GetKeyNames() (error, []string) {
 	return nil, keyNames
 }
 
-func (InMemoryKms) GetKeysMetadata(names []string) (error, []KeyMeta) {
-	return notImplemented(), nil
+func (k InMemoryKms) GetKeysMetadata(names []string) (error, []KeyMeta) {
+	result := make([]KeyMeta, 0)
+	for _, name := range names {
+		meta, found := k.metadata[name]
+		if found {
+			result = append(result, meta)
+		}
+	}
+	return nil, result
 }
